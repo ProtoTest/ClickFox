@@ -1,0 +1,103 @@
+Protractor Framework Readme
+===========================
+
+Dev Environment Setup
+---------------------
+
+### Install Node
+Protractor is based on nodejs, so you will have to install that first. Go to [the node homepage](http://nodejs.org) to download it, and follow their installation instructions.
+
+Users of Ubuntu would be best served by using apt to install it. As a Mac user, I prefer the Homebrew method. But since I'm currently the only one on the team that isn't using Windows, I guess that's kind of moot.
+
+### Install Protractor
+Once you have node, you can install Protractor with npm. Run the following commands in a terminal:
+
+    npm install -g protractor
+    webdriver-manager update
+
+### Set up your IDE
+IntelliJ has support for debugging node programs (which our Protractor tests are), but requires some setup. It is possible that similar support can be had in Eclipse, but I haven't had time to research that.
+
+First, you need to install the Nodejs IntelliJ plugin:
+1. Open the IntelliJ preferences and search for "plugins"; open the Plugins preference pane
+2. Click "Browse repositories..."
+3. Search for nodejs
+4. Install the NodeJS plugin (the one called "NodeJS", whose vendor is JetBrains)
+
+Clone the repo so you have a project to work with. It's probably simplest if you use IntelliJ's built-in support for this:
+1. From the menu bar, choose VCS > Checkout from Version Control > Mercurial
+2. The Vcs Repository URL is https://source.clickfox.net/hg/qa/ui
+3. (The parent directory and directory name are a matter of personal preference)
+4. Click Clone
+5. When asked if you'd like to create an IntelliJ project, say yes
+6. Just click all the way through the wizard, leaving all settings as-is
+7. From the command line, cd to your newly-cloned project directory and run "npm install"
+
+NOTE: On OSX, if you get the following error: "_ssl.c:504: error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed", goto this site <http://mercurial.selenic.com/wiki/CACertificates#Mac_OS_X_10.6_and_higher> to add a certificate to mercurial
+
+Finally, follow the [instructions](http://angular.github.io/protractor/#/debugging) under the heading "Setting Up WebStorm for Debugging" to enable running and debugging your tests from IntelliJ. (WebStorm is a web-dev-specialized version of IntelliJ that costs less money. Everything WebStorm can do, IntelliJ can also do.)
+
+
+Resources for Learning Protractor and Associated Technologies
+-------------------------------------------------------------
+
+### JavaScript
+It's been so many years since I learned JavaScript that I wouldn't know where to point you. I've heard good things about Code Acadamy. Stay away from W3Schools (their stuff tends to be outdated, incomplete, or just plain innaccurate). The Mozilla Developer Network (MDN) is a great resource.
+
+### Jasmine
+Jasmine is the test runner used by Protractor. Its role is analogous to JUnit, but it is quite a bit simpler. Read the [introduction](http://jasmine.github.io/1.3/introduction.html), skipping the stuff about spies and mocking since they don't really apply to Selenium tests.
+
+### Protractor
+Work through [the tutorial](http://angular.github.io/protractor/#/tutorial). Read as much of the rest of the documentation as you feel you need. In particular, familiarize yourself with [the protractor-specific locators](http://angular.github.io/protractor/#/api?view=ProtractorBy).
+
+Note also that the protractor By object inherits from the WebDriver By object, so you can also use all standard Selenium locators. You should familiarize yourself with those as well. [Documentation here.](http://selenium.googlecode.com/git/docs/api/javascript/namespace_webdriver_By.html)
+
+### Node
+There is a lot to learn about Node, but fortunately, writing protractor tests does not exercise much in the way of node skills. I'll put everything you need to know to start in here.
+
+There is a chance that, at some point, we will want to take advantage of some of the huge library of packages on npm. For example, if we ever need to access a database, there's a package for that. But, by and large, we shouldn't need them.
+
+#### Node modules
+In node, the mechanism for requiring external files is called `modules`. In order to break a node program up into multiple files, each file has to implement a module, and `export` the functionality that it wants to provide to files that require it.
+
+This system is extremely flexible, leading to a number of styles for implementing modules. It is easy to be confused by all these different styles. Keep in mind: __whatever you assign to the module.exports variable will be returned by the require() function.__
+
+The module.exports variable, along with a top-level alias to it, is automatically provided to every module. You can pretend your scripts begin with this line of code:
+
+	var exports = module.exports = {};
+
+The style you choose for your module will depend on what you want to do with it. For example:
+1. If you want to export a simple list of properties, assign an object literal to `module.exports`. I use this pattern to implement UI maps, which are just lists of locators.
+2. If you want to implement an object that can be easily instantiated, assign a constructor function to module.exports. You can see this in action in CEAUser.js.
+3. If you want to export a collection of functions, you can just assign them to properties of the provided exports object. This is essentially eqivalent to assigning an object literal, but it lets you have functions and other variables that are not exported. I use this pattern to implement page objects.
+
+
+Implementing Tests
+------------------
+
+### Configuration
+The global configuration is located at test/config/config.js. You should not modify this file, as it will be used to automatically run tests on the grid. Instead, you can augment (and override) this file by creating a local.js file. Whatever you put in your local config will be added to the global config, replacing those things that are the same.
+
+An example local.js is provided at test/config/local.example.js. Feel free to copy and rename it to local.js so you can use it as a basis for your own config. Don't add your local.js to version control.
+
+### Project Structure
+At the time of this writing, I'm still working out the fine details of the project structure, but it will go something like this:
+* Put all tests in the test directory.
+* For each major area of the program (i.e. Analyze, Discover), create a subdirectory of the same name.
+* Each suite you create should be comprised of three files: 
+	* The suite spec itself, named after the feature it tests (i.e. "feature.js")
+	* The ui map, called "featureLocators.js"
+	* The page object, called "featurePO.js"
+
+Add all suites to the subsuites array in topLevelSuite.js so that they will run.
+
+### Running a Subset of Suites
+Sadly, IntelliJ is not as integrated with Jasmine and Protractor as it was with JUnit, so you can't use it to run individual suites. Instead, add an `overrideSuites` array to the params in your local config. This will be used in place of the `subsuites` array in topLevelSuite.js.
+
+### Spec Description Guidelines
+Jasmine encourages you to provide a rich description of your test cases. The `describe` function groups test cases together, and the `it` function defines a test case. Both require a descriptive string as their first argument. When logging results, these two strings get concatenated together, and ideally, this will produce a comprehensible sentence.
+
+### Test Case Size
+A test case should test as little as is reasonable. The ideal test case has only one call to `expect`, since this keeps the granularity of results fine enough that errors are very useful in pinpointing root cause. 
+
+That said, this is by no means a hard and fast condition. Use more if it makes sense, with an eye towards preserving the granularity of your spec.

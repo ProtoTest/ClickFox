@@ -1,0 +1,14 @@
+syntax: glob
+
+# Mac crap
+.DS_Store
+
+# IntelliJ crap
+*.iml
+.idea
+
+# Node crap
+**/node_modules
+
+# Config crap
+test/config/local.js
