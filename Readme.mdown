@@ -33,7 +33,7 @@ Clone the repo so you have a project to work with. It's probably simplest if you
 6. Just click all the way through the wizard, leaving all settings as-is
 7. From the command line, cd to your newly-cloned project directory and run "npm install"
 
-NOTE: On OSX, if you get the following error: "_ssl.c:504: error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed", goto this site <http://mercurial.selenic.com/wiki/CACertificates#Mac_OS_X_10.6_and_higher> to add a certificate to mercurial
+NOTE PROTOTEST IS GETTING: On OSX, if you get the following error: "_ssl.c:504: error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed", goto this site <http://mercurial.selenic.com/wiki/CACertificates#Mac_OS_X_10.6_and_higher> to add a certificate to mercurial
 
 Finally, follow the [instructions](http://angular.github.io/protractor/#/debugging) under the heading "Setting Up WebStorm for Debugging" to enable running and debugging your tests from IntelliJ. (WebStorm is a web-dev-specialized version of IntelliJ that costs less money. Everything WebStorm can do, IntelliJ can also do.)
 
